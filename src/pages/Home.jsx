@@ -1,68 +1,43 @@
 import { useState } from 'react';
-import LoadingScreen from './LoadingScreen';
-import QuizReady from './QuizReady';
-import './Home.css';
 import { useNavigate } from 'react-router-dom';
+import useQuizStore from '../state/QuizStore.js'
+import './Home.css';
 
 function Home() {
-    const navigate = useNavigate()
-    const [isLoading, setIsLoading] = useState(false);
-    const [isReady, setIsReady] = useState(false);
-    const [quizParams, setQuizParams] = useState({
-        type: 'MATHS',
-        numberOfQuestions: 10,
-        level: 'EASY'
+  const [isLoading, setIsLoading] = useState(false);
+  const { quizParams, setQuizParams } = useQuizStore();
+  const navigate = useNavigate();
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setQuizParams({
+      ...quizParams,
+      [name]: name === 'numberOfQuestions' ? parseInt(value) : value
     });
-    const [quizData, setQuizData] = useState(null);
+  };
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setQuizParams(prev => ({
-            ...prev,
-            [name]: name === 'numberOfQuestions' ? parseInt(value) : value
-        }));
-    };
+  const generateQuiz = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('http://localhost:8080/api/quiz/new', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(quizParams),
+      });
 
-    const generateQuiz = async () => {
-        setIsLoading(true);
-        try {
-            const response = await fetch('http://localhost:8080/api/quiz/new', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    type: quizParams.type,
-                    numberOfQuestions: quizParams.numberOfQuestions,
-                    level: quizParams.level
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            const data = await response.json();
-            setQuizData(data); // Store the quiz data
-            setIsReady(true);  // Mark as ready
-        } catch (error) {
-            console.error('Error generating quiz:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // Show loading screen while generating
-    if (isLoading) {
-        return <LoadingScreen />;
+      if (!response.ok) throw new Error('Network response was not ok');
+      
+      const data = await response.json();
+      useQuizStore.getState().setQuizData(data?.questions);
+      navigate('/ready');
+    } catch (error) {
+      console.error('Error generating quiz:', error);
+    } finally {
+      setIsLoading(false);
     }
-
-    // Show quiz ready screen when data is available
-    if (isReady && quizData) {
-        navigate('/ready', { state: { quizData: quizData } });
-    }
-
-    // Default view - quiz parameter selection
+  };
     return (
         <div className="app-container">
             <div className="quiz-controls">
@@ -114,12 +89,12 @@ function Home() {
                 </div>
 
                 <button 
-                    className="generate-btn" 
-                    onClick={generateQuiz}
-                    disabled={isLoading}
-                >
-                    GENERATE!
-                </button>
+        className="generate-btn" 
+        onClick={generateQuiz}
+        disabled={isLoading}
+      >
+        {isLoading ? 'GENERATING...' : 'GENERATE!'}
+      </button>
             </div>
         </div>
     );

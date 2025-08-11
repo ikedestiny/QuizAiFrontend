@@ -1,26 +1,15 @@
+import { useNavigate } from 'react-router-dom';
+import useQuizStore from '../state/QuizStore'
 import './Ready.css';
-import { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function QuizReady() {
   const navigate = useNavigate();
-  const location = useLocation();
-  
-  // Get quizData from location state
-  const quizData = location.state?.quizData;
-
-  // Optional: Add typing animation effect
-  useEffect(() => {
-    document.title = "Quiz Ready | Quiz AI";
-    
-    // Redirect if no quiz data is available
-    if (!quizData) {
-      navigate('/');
-    }
-  }, [quizData, navigate]);
+  const { quizData, resetQuiz } = useQuizStore();
 
   const startQuiz = () => {
-    navigate('/quiz', { state: { quizData } });
+    resetQuiz(); // Reset quiz state before starting
+    console.log("ready date:",quizData)
+    navigate('/quiz');
   };
 
   return (
@@ -39,18 +28,12 @@ export default function QuizReady() {
           </svg>
         </div>
         
-        <p className="ready-description">
-          Your {quizData?.length || 0}-question quiz has been generated successfully.<br />
-          Click below to begin the challenge!
-        </p>
-        
-        <button 
-          className="start-button"
-          onClick={startQuiz}
-        >
-          START QUIZ
-          <span className="button-arrow">→</span>
-        </button>
+       <p className="ready-description">
+        Your {quizData.length}-question quiz is ready!
+      </p>
+      <button className="start-button" onClick={startQuiz}>
+        START QUIZ
+      </button>
       </div>
     </div>
   );

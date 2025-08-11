@@ -1,19 +1,19 @@
 import './Quiz.css';
-import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import useQuizStore from '../state/QuizStore';
 
 export default function Quiz() {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const [selectedOption, setSelectedOption] = useState(null);
-  const [isAnswered, setIsAnswered] = useState(false);
   const navigate = useNavigate();
-  
-  // Get quizData from location state
-  const location = useLocation();
-  const quizData = location.state?.quizData || [];
+  const {
+    quizData,
+    currentQuestionIndex,
+    score,
+    selectedOption,
+    isAnswered,
+    selectOption,
+    nextQuestion
+  } = useQuizStore();
 
-  // If no quiz data, redirect back
   if (quizData.length === 0) {
     navigate('/');
     return null;
@@ -22,31 +22,15 @@ export default function Quiz() {
   const currentQuestion = quizData[currentQuestionIndex];
   const totalQuestions = quizData.length;
   const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
-
-  const handleOptionSelect = (optionIndex) => {
-    if (isAnswered) return;
-    
-    setSelectedOption(optionIndex);
-    setIsAnswered(true);
-    
-    if (currentQuestion.options[optionIndex] === currentQuestion.answer) {
-      setScore(score + 1);
-    }
-  };
-
-  const handleNextQuestion = () => {
-    if (!isAnswered) return;
-    
-    if (!isLastQuestion) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setSelectedOption(null);
-      setIsAnswered(false);
-    } else {
-      navigate('/quiz-results', { state: { score, totalQuestions } });
-    }
-  };
-
   const progressWidth = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+  
+  const handleNextQuestion = () => {
+    if (isLastQuestion) {
+      navigate('/result');
+    } else {
+      nextQuestion();
+    }
+  };
 
   return (
     <div className="quiz-container">
@@ -70,28 +54,25 @@ export default function Quiz() {
         <h2 className="question-text">{currentQuestion.question}</h2>
         
         <div className="options-grid">
-          {currentQuestion.options.map((option, index) => (
-            <button
-              key={index}
-              className={`option-button ${
-                selectedOption === index 
-                  ? option === currentQuestion.answer 
-                    ? 'correct' 
-                    : 'incorrect'
-                  : isAnswered && option === currentQuestion.answer 
-                    ? 'correct' 
-                    : ''
-              }`}
-              onClick={() => handleOptionSelect(index)}
-              disabled={isAnswered}
-            >
-              <span className="option-letter">
-                {String.fromCharCode(65 + index)}
-              </span>
-              <span className="option-text">{option}</span>
-            </button>
-          ))}
-        </div>
+        {currentQuestion.options.map((option, index) => (
+          <button
+            key={index}
+            className={`option-button ${
+              selectedOption === index 
+                ? option === currentQuestion.answer 
+                  ? 'correct' 
+                  : 'incorrect'
+                : isAnswered && option === currentQuestion.answer 
+                  ? 'correct' 
+                  : ''
+            }`}
+            onClick={() => selectOption(index)}
+            disabled={isAnswered}
+          >
+            <span className="option-text">{option}</span>
+          </button>
+        ))}
+      </div>
       </div>
 
       {isAnswered && (

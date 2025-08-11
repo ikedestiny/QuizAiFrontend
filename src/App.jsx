@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import LoadingScreen from './pages/LoadingScreen'
 import QuizReady from './pages/QuizReady'
 import Quiz from './pages/Quiz'
+import QuizResults from './pages/QuizResult'
 
 function App() {
   return (  
@@ -16,6 +17,7 @@ function App() {
         <Route path='/loading' element={<LoadingScreen/>}/>
         <Route path='/ready' element={<QuizReady/>}/>
         <Route path='/quiz' element={<Quiz/>}/>
+        <Route path='/result' element={<QuizResults/>}/>
       </Routes>
     </BrowserRouter>
   )
