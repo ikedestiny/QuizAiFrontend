@@ -1,6 +1,5 @@
 # 🧠 QuizAI - Interactive Quiz Application
-
-![QuizAI Screenshot](screenshot.png) *Replace with your actual screenshot*
+![alt text](image.png) *Replace with your actual screenshot*
 
 ## 🌟 Features
 
