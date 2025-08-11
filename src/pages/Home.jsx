@@ -19,7 +19,7 @@ function Home() {
   const generateQuiz = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:8080/api/quiz/new', {
+      const response = await fetch('https://quizaibackend.onrender.com/api/quiz/new', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

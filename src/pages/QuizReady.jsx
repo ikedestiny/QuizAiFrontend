@@ -8,7 +8,6 @@ export default function QuizReady() {
 
   const startQuiz = () => {
     resetQuiz(); // Reset quiz state before starting
-    console.log("ready date:",quizData)
     navigate('/quiz');
   };
 
